@@ -1,7 +1,9 @@
 #include "TString.h"
 
 TString::~TString()
-{}
+{
+	delete[] Data;
+}
 
 TString::TString()
 {
@@ -52,7 +54,7 @@ TString& TString:: operator = (const TString& rhs)
 	return *this;
 }
 
-TString& TString:: operator +=(const TString& rhs)
+TString& TString:: operator += (const TString& rhs)
 {
 	char* buf = new char [(*this).Size() + rhs.Size() + 1];
 	int i(0);
@@ -70,6 +72,7 @@ TString& TString:: operator +=(const TString& rhs)
 	}
 	buf[i] = '\0'; 
 	*this = buf;
+	delete[] buf;
 	return *this;
 }
 
@@ -92,10 +95,7 @@ bool TString:: operator <(const TString& rhs) const
 		if (rhs[i] == '\0') return 0;
 		i++;
 	}
-	if ((*this)[i] > rhs[i])
-	{
-		return 0;
-	}
+	if ((*this)[i] > rhs[i]) return 0;
 	return 1;
 }
 
@@ -131,10 +131,7 @@ void TString::Replace(char oldSymbol, char newSymbol)
 size_t TString::Size() const
 {
 	int i(0);
-	while ((*this)[i] != '\0')
-	{
-		i++;
-	}
+	while ((*this)[i] != '\0') i++;
 	return i;
 }
 
