@@ -200,6 +200,6 @@ bool operator > (const TString & a, const TString & b)
 
 std::ostream & operator<<(std::ostream &out, const TString &str)
 {
-	std::cout << str.Data << std::endl;
+	out << str.Data;
 	return out;
 }
