@@ -14,30 +14,24 @@ TString::TString()
 TString::TString(const TString& rhs)
 {
 	int i(-1);
-	char* buf = new char[rhs.Size() + 1];
+	Data = new char[rhs.Size() + 1];
 	do
 	{
 		i++;
-		buf[i] = rhs[i];
+		(*this)[i] = rhs[i];
 	} while (rhs[i] != '\0');
-	Data = new char[i + 1];
-	for (; i >= 0; i--) (*this)[i] = buf[i];
-	delete[] buf;
 }
 
 TString::TString(const char * data)
 {
 	int i(-1), j(0);
 	while (data[j] != '\0') j++;
-	char* buf = new char[j + 1];
+	Data = new char[j + 1];
 	do
 	{
 		i++;
-		buf[i] = data[i];
+		Data[i] = data[i];
 	} while (data[i] != '\0');
-	Data = new char[i + 1];
-	for (; i >= 0; i--) (*this)[i] = buf[i];
-	delete[] buf;
 }
 
 TString& TString:: operator = (const TString& rhs)
