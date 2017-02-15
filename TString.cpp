@@ -7,7 +7,7 @@ TString::~TString()
 
 TString::TString()
 {
-	Data = new char;
+	Data = new char[1];
 	*Data = '\0';
 }
 
@@ -43,19 +43,18 @@ TString::TString(const char * data)
 TString& TString:: operator = (const TString& rhs)
 {
 	if ((*this) == rhs) return (*this);
-	int i(0);
+	int i(-1);
 	delete[] Data;
 	Data = new char[rhs.Size() + 1];
-	while (rhs[i] != '\0')
+	do
 	{
-		(*this)[i] = rhs[i];
 		i++;
-	}
-	(*this)[i] = '\0';
+		(*this)[i] = rhs[i];
+	} while (rhs[i] != '\0');
 	return *this;
 }
 
-TString& TString:: operator +=(const TString& rhs)
+TString& TString:: operator += (const TString& rhs)
 {
 	char* buf = new char[(*this).Size() + rhs.Size() + 1];
 	int i(0);
@@ -77,7 +76,7 @@ TString& TString:: operator +=(const TString& rhs)
 	return *this;
 }
 
-bool TString:: operator ==(const TString& rhs) const
+bool TString:: operator == (const TString& rhs) const
 {
 	int i(0);
 	while ((*this)[i] == rhs[i])
@@ -88,7 +87,7 @@ bool TString:: operator ==(const TString& rhs) const
 	return 0;
 }
 
-bool TString:: operator <(const TString& rhs) const
+bool TString:: operator < (const TString& rhs) const
 {
 	int i(0);
 	while ((*this)[i] == rhs[i])
@@ -105,12 +104,12 @@ bool TString:: operator <(const TString& rhs) const
 
 size_t TString::Find(const TString& substr) const
 {
-	int i(0);
+	int i(0), j(0), i1(0);
 	if (substr[0] == '\0') return -1;
 	while ((*this)[i] != '\0')
 	{
-		int j(0);
-		int i1(i);
+		j = 0;
+		i1 = i;
 		while (substr[j] != '\0' && (*this)[i1] == substr[j])
 		{
 			i1++;
@@ -155,10 +154,7 @@ char TString:: operator[](size_t index) const
 
 char& TString:: operator[](size_t index)
 {
-	char* buf = Data;
-	for (int i(0); i < index; i++) buf++;
-	char& buf1 = *buf;
-	return buf1;
+	return Data[index];
 }
 
 void TString::RTrim(char symbol)
