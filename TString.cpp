@@ -154,7 +154,7 @@ char TString:: operator[](size_t index) const
 
 char& TString:: operator[](size_t index)
 {
-	return Data[index];
+	return (char&)Data[index];
 }
 
 void TString::RTrim(char symbol)
