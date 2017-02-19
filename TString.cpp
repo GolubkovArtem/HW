@@ -13,58 +13,32 @@ TString::TString()
 
 TString::TString(const TString& rhs)
 {
-	int i(-1);
 	Data = new char[rhs.Size() + 1];
-	do
-	{
-		i++;
-		(*this)[i] = rhs[i];
-	} while (rhs[i] != '\0');
+	memcpy(Data, rhs.Data, (rhs.Size() + 1) * sizeof(char));
 }
 
 TString::TString(const char * data)
 {
-	int i(-1), j(0);
+	int j(0);
 	while (data[j] != '\0') j++;
 	Data = new char[j + 1];
-	do
-	{
-		i++;
-		Data[i] = data[i];
-	} while (data[i] != '\0');
+	memcpy(Data, data, (j + 1) * sizeof(char));
 }
 
 TString& TString:: operator = (const TString& rhs)
 {
 	if ((*this) == rhs) return (*this);
-	int i(-1);
 	delete[] Data;
 	Data = new char[rhs.Size() + 1];
-	do
-	{
-		i++;
-		(*this)[i] = rhs[i];
-	} while (rhs[i] != '\0');
+	memcpy(Data, rhs.Data, (rhs.Size() + 1) * sizeof(char));
 	return *this;
 }
 
 TString& TString:: operator += (const TString& rhs)
 {
 	char* buf = new char[(*this).Size() + rhs.Size() + 1];
-	int i(0);
-	while ((*this)[i] != '\0')
-	{
-		buf[i] = (*this)[i];
-		i++;
-	}
-	int j(0);
-	while (rhs[j] != '\0')
-	{
-		buf[i] = rhs[j];
-		i++;
-		j++;
-	}
-	buf[i] = '\0';
+	memcpy(buf, Data, (*this).Size() * sizeof(char));
+	memcpy(&buf[(*this).Size()], rhs.Data, (rhs.Size() + 1) * sizeof(char));
 	*this = buf;
 	delete[] buf;
 	return *this;
@@ -155,11 +129,8 @@ void TString::RTrim(char symbol)
 {
 	int i = (*this).Size() - 1;
 	while (i >= 0 && (*this)[i] == symbol) i--;
-	char* buf = new char[i + 2];
-	buf[i + 1] = '\0';
-	for (; i >= 0; i--) buf[i] = (*this)[i];
-	(*this) = buf;
-	delete[] buf;
+	Data = (char*)realloc(Data, (i + 2) * sizeof(char));
+	Data[i + 1] = '\0';
 }
 
 void TString::LTrim(char symbol)
@@ -167,8 +138,7 @@ void TString::LTrim(char symbol)
 	int i(0);
 	while ((*this)[i] == symbol) i++;
 	char* buf = new char[(*this).Size() + 1 - i];
-	int j;
-	for (j = 0; j < (*this).Size() + 1 - i; j++) buf[j] = (*this)[i + j];
+	memcpy(buf, &Data[i], ((*this).Size() - i + 1) * sizeof(char));
 	(*this) = buf;
 	delete[] buf;
 }
