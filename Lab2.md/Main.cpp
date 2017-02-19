@@ -11,10 +11,8 @@ int main()
 	std::string str;
 	size_t scale(0);
 	float increment(0);
-	int i(number);
-	while (i > 0)
+	for (int i = 0; i < number; i++)
 	{
-		i--;
 		std::cout << "Enter the FIO:" << std::endl;
 		std::cin >> str;
 		std::cout << "Enter the scale:" << std::endl;
