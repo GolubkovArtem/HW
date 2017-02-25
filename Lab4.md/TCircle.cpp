@@ -16,9 +16,10 @@ double TCircle::Surface() const
 	return (M_PI * pow(Radius, 2));
 }
 
-void TCircle::Show() const
+std::ostream& operator << (std::ostream& out, const TCircle& circle)
 {
-	std::cout << "Radius is " << Radius
-		<< " Surface is " << this->Surface()
+	out << "Radius is " << circle.Radius 
+		<< " Surface is " << circle.Surface()
 		<< "\n";
+	return out;
 }
