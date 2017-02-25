@@ -9,5 +9,7 @@ public:
 	TCircle();
 	TCircle(size_t radius);
 	virtual double Surface() const;
-	virtual void Show() const;
+	friend std::ostream& operator << (std::ostream&, const TCircle&);
 };
+
+std::ostream& operator << (std::ostream& out, const TCircle& circle);
