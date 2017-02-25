@@ -3,11 +3,11 @@
 
 int main()
 {
-	TCircle circle(3);
-	circle.Show();
-	TOrb orb(3);
-	orb.Show();
+	TCircle circle(2);
+	std::cout << circle;
+	TOrb orb(2);
+	std::cout << orb;
 	TCircle* orb1 = &orb;
-	orb1->Show();
+	std::cout << *orb1;
 	system("pause");
 }
