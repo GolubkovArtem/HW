@@ -10,6 +10,7 @@ int main()
 	vec2 = vec2;
 	vec1 = vec2;
 	TVector vec3 = str1 + vec2;
+	vec3 = str1 + vec2;
 	std::cout << vec1 << std::endl;
 	std::cout << vec3 << std::endl;
 	system("pause");
