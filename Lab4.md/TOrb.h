@@ -7,7 +7,5 @@ public:
 	TOrb();
 	TOrb(size_t radius);
 	double Surface() const;
-	friend std::ostream& operator << (std::ostream&, const TOrb&);
+	void Show() const;
 };
-
-std::ostream& operator << (std::ostream& out, const TOrb& orb);
