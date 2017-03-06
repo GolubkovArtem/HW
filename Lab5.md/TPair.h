@@ -11,7 +11,7 @@ public:
 	TPair(int first, int second);
 	virtual void operator () (int first, int second);
 	TPair& operator = (const TPair& pair);
-	TPair operator + (const TPair& pair);
+	virtual TPair operator + (const TPair& pair);
 	friend std::ostream& operator << (std::ostream& , const TPair& );
 };
 
