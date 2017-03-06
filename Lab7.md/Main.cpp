@@ -16,7 +16,7 @@ bool Palindrome(const std::string & string)
 std::string Search(std::string & string)
 {
 	std::string bufString1, bufString2;
-	std::fstream file("C:\\Users\\Артём\\Desktop\\rit.txt", std::fstream::in);
+	std::fstream file("C:\\Users\\Артём\\Desktop\\rit.txt", std::fstream::in); /// меняем адрес файла
 	while (std::getline(file, bufString1) && !bufString1.empty())
 	{
 		bufString2 += ' ' + bufString1;
