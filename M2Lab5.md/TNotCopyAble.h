@@ -15,9 +15,47 @@ struct FileAlreadyOpened
 	{ }
 };
 
+class CloseCheck
+{
+	static CloseCheck * Head;
+	CloseCheck * pNext;
+	FILE * File;
+public:
+	bool CheckFile(const FILE * file)
+	{
+		if (file == nullptr) return 1;
+		CloseCheck * pBuf = Head;
+		do {
+			fclose(pBuf->File);
+			pBuf = pBuf->pNext;
+		} while (pBuf != Head);
+		Head = nullptr;
+		throw FileAlreadyOpened();
+	}
+	void OpenFile(FILE * file)
+	{
+		File = file;
+		if (Head)
+		{
+			pNext = Head;
+			CloseCheck *& pBuf = pNext->pNext;
+			while (pBuf != Head)
+				pBuf = pBuf->pNext;
+			Head = this;
+			pBuf = Head;
+		}
+		else
+		{
+			Head = this;
+			pNext = Head;
+		}
+	}
+};
+
 class TNotCopyable
 {
 	FILE * Descriptor;
+	CloseCheck Check;
 public:
 	~TNotCopyable()
 	{
@@ -26,21 +64,18 @@ public:
 	TNotCopyable()
 		: Descriptor(nullptr)
 	{ }
-	TNotCopyable(const TNotCopyable & ) = delete;
-	TNotCopyable & operator = (const TNotCopyable & ) = delete;
-
 	void OpenToWrite(std::string const & fileName)
 	{
-		if (Descriptor != nullptr)
-			throw FileAlreadyOpened();
+		Check.CheckFile(Descriptor);
 		Descriptor = fopen(fileName.c_str(), "w");
+		Check.OpenFile(Descriptor);
 	}
 
 	void OpenToRead(std::string const & fileName)
 	{
-		if (Descriptor != nullptr)
-			throw FileAlreadyOpened();
+		Check.CheckFile(Descriptor);
 		Descriptor = fopen(fileName.c_str(), "r");
+		Check.OpenFile(Descriptor);
 	}
 
 	void Close() throw()
@@ -51,11 +86,13 @@ public:
 			Descriptor = nullptr;
 		}
 	}
-
 	FILE * Get()
 	{
 		return Descriptor;
 	}
+private:
+	TNotCopyable(const TNotCopyable & ) = delete;
+	TNotCopyable & operator = (const TNotCopyable & ) = delete;
 };
 
 #endif // __NOTCOPYABLE_INCLUDED__
