@@ -1,7 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include <string>
-#include <math.h>
 
 class TInteger
 {
@@ -58,13 +56,11 @@ public:
 		return Integer * integer.Integer;
 	}
 	int operator / (const TInteger & integer) const {
-		if (Integer == -pow(2, 31) && integer.Integer == -1)
-			throw ("OverFlow");
+		this->TryDivide(integer);
 		return Integer / integer.Integer;
 	}
 	int operator % (const TInteger & integer) const {
-		if (Integer == -pow(2, 31) && integer.Integer == -1)
-			throw ("OverFlow");
+		this->TryDivide(integer);
 		return Integer % integer.Integer;
 	}
 	int operator & (const TInteger & integer) const {
@@ -99,19 +95,17 @@ public:
 		return *this;
 	}
 	TInteger & operator *= (const TInteger & integer) {
-		this->TryAdd(integer.Integer);
+		this->TryMyltiply(integer.Integer);
 		Integer *= integer.Integer;
 		return *this;
 	}
 	TInteger & operator /= (const TInteger & integer) {
-		if (Integer == -pow(2, 31) && integer.Integer == -1)
-			throw ("OverFlow");
+		this->TryDivide(integer);
 		Integer /= integer.Integer;
 		return *this;
 	}
 	TInteger & operator %= (const TInteger & integer) {
-		if (Integer == -pow(2, 31) && integer.Integer == -1)
-			throw ("OverFlow");
+		this->TryDivide(integer);
 		Integer %= integer.Integer;
 		return *this;
 	}
@@ -153,19 +147,21 @@ public:
 	}
 
 
-	void TryAdd(const TInteger & integer) const
-	{
+	void TryAdd(const TInteger & integer) const {
 		int buf = integer.Integer + Integer;
 		int sign1 = (Integer > 0) - (Integer < 0);
 		int sign2 = (integer > 0) - (integer < 0);
 		if (sign1 * sign2 > 0 && integer.Integer * sign1 > sign1 * buf)
 			throw("OverFlow");
 	}
-	void TryMyltiply(const TInteger & integer) const
-	{
+	void TryMyltiply(const TInteger & integer) const {
 		TInteger buf = integer.Integer * Integer;
 		if (buf != 0 && buf / integer != Integer)
 			throw("OverFlow");
+	}
+	void TryDivide(const TInteger & integer) const {
+		if (Integer == -pow(2, 31) && integer.Integer == -1)
+			throw ("OverFlow");
 	}
 
 
