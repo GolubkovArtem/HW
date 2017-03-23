@@ -15,69 +15,27 @@ struct FileAlreadyOpened
 	{ }
 };
 
-class CloseCheck
-{
-	static CloseCheck * Head;
-	CloseCheck * pNext;
-	FILE * File;
-public:
-	bool CheckFile(const FILE * file)
-	{
-		if (file == nullptr) return 1;
-		CloseCheck * pBuf = Head;
-		do {
-			fclose(pBuf->File);
-			pBuf = pBuf->pNext;
-		} while (pBuf != Head);
-		Head = nullptr;
-		throw FileAlreadyOpened();
-	}
-	void OpenFile(FILE * file)
-	{
-		File = file;
-		if (Head)
-		{
-			pNext = Head;
-			CloseCheck *& pBuf = pNext->pNext;
-			while (pBuf != Head)
-				pBuf = pBuf->pNext;
-			Head = this;
-			pBuf = Head;
-		}
-		else
-		{
-			Head = this;
-			pNext = Head;
-		}
-	}
-};
-
 class TNotCopyable
 {
-	FILE * Descriptor;
-	CloseCheck Check;
 public:
 	~TNotCopyable()
 	{
 		this->Close();
 	}
-	TNotCopyable()
-		: Descriptor(nullptr)
-	{ }
-	void OpenToWrite(std::string const & fileName)
+	TNotCopyable(std::string const & fileName, const char * mode)
 	{
-		Check.CheckFile(Descriptor);
-		Descriptor = fopen(fileName.c_str(), "w");
-		Check.OpenFile(Descriptor);
+		static const char* modes[] = { "r", "w", "a", "r+", "w+", "a+" };
+		for (size_t i = 0; i < 6; ++i)
+		{
+			if (modes[i] == mode)
+			{
+				Descriptor = fopen(fileName.c_str(), mode);
+				if (Descriptor == nullptr)
+					throw(std::exception("Incorrect way"));
+			}
+		}
+		throw(std::exception("Incorrect mode"));
 	}
-
-	void OpenToRead(std::string const & fileName)
-	{
-		Check.CheckFile(Descriptor);
-		Descriptor = fopen(fileName.c_str(), "r");
-		Check.OpenFile(Descriptor);
-	}
-
 	void Close() throw()
 	{
 		if (Descriptor != nullptr)
@@ -91,6 +49,7 @@ public:
 		return Descriptor;
 	}
 private:
+	FILE * Descriptor;
 	TNotCopyable(const TNotCopyable & ) = delete;
 	TNotCopyable & operator = (const TNotCopyable & ) = delete;
 };
