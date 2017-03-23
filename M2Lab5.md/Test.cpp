@@ -5,21 +5,20 @@ int main()
 {
 	try
 	{
-		TNotCopyable obj1("rit1.txt", "r");
+		TNotCopyable obj;
 
-		TNotCopyable obj2("rit2.txt", "open");
+		RAII raiiObj(&obj);
 
-		//TNotCopyable obj3("C:", "open");
+		obj.OpenToWrite("rit1.txt");
 
-		//obj3.Close();
+		obj.OpenToRead("rit2.txt");
 
-		obj1.Close();
-
-		obj2.Close();
+		obj.Close();
 	}
 	catch (const std::exception & e)
 	{
 		std::cout << e.what() << std::endl;
 	}
+
 	system("pause");
 }
