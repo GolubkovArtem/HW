@@ -90,5 +90,6 @@ float FloatFromString(const char * data)
 bool BoolFromString(const char * data)
 {
 	size_t length = strlen(data);
+	if (data == nullptr) return 0;
 	if (FloatFromString(data)) return 1;
 }
