@@ -91,5 +91,5 @@ bool BoolFromString(const char * data)
 {
 	size_t length = strlen(data);
 	if (!length || (length == 1 && *data == '0')) return 0;
-	if (IntFromString(data) || FloatFromString(data)) return 1;
+	if (IntFromString(data)) return 1;
 }
