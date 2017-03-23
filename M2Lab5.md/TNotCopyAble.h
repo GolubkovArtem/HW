@@ -24,8 +24,8 @@ public:
 	}
 	TNotCopyable(std::string const & fileName, const char * mode)
 	{
-		static const char* modes[] = { "r", "w", "a", "r+", "w+", "a+" };
-		for (size_t i = 0; i < 6; ++i)
+		static const char* modes[] = { "r", "w", "a", "r+", "w+", "a+", "rb", "wb", "ab", "r+b", "w+b", "a+b", "rb+", "wb+", "ab+", "wx", "wbx", "w+x", "wb+x", "w+bx" };
+		for (size_t i = 0; i < 20; ++i)
 		{
 			if (modes[i] == mode)
 			{
