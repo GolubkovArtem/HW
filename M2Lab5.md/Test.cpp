@@ -1,30 +1,25 @@
 #include "TNotCopyable.h"
 #include <iostream>
 
-CloseCheck * CloseCheck::Head(nullptr);
-
 int main()
 {
-	while (1)
+	try
 	{
-		TNotCopyable obj1;
-		try
-		{
-			TNotCopyable obj2;
+		TNotCopyable obj1("rit1.txt", "r");
 
-			obj1.OpenToWrite("C:\\Users\\Артём\\Desktop\\rit1.txt");
+		TNotCopyable obj2("rit2.txt", "open");
 
-			obj2.OpenToWrite("C:\\Users\\Артём\\Desktop\\rit2.txt");
+		//TNotCopyable obj3("C:", "open");
 
-			obj2.OpenToRead("C:\\Users\\Артём\\Desktop\\rit2.txt");
+		//obj3.Close();
 
-			obj1.Close();
-			obj2.Close();
-		}
-		catch (const std::exception & e)
-		{
-			std::cout << e.what() << std::endl;
-		}
+		obj1.Close();
+
+		obj2.Close();
+	}
+	catch (const std::exception & e)
+	{
+		std::cout << e.what() << std::endl;
 	}
 	system("pause");
 }
