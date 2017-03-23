@@ -62,7 +62,7 @@ float FloatFromString(const char * data)
 			throw (TInvalidSymbol());
 	}
 
-
+	if (dot == -1) dot = length;
 	if (dot - minus > 39 || length - dot > 39)
 		throw (TOverFlow());
 
@@ -91,5 +91,5 @@ bool BoolFromString(const char * data)
 {
 	size_t length = strlen(data);
 	if (!length || (length == 1 && *data == '0')) return 0;
-	if (IntFromString(data)) return 1;
+	if (FloatFromString(data)) return 1;
 }
