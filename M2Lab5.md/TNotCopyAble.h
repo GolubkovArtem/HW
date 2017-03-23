@@ -15,27 +15,33 @@ struct FileAlreadyOpened
 	{ }
 };
 
+
 class TNotCopyable
 {
+	FILE * Descriptor;
+
 public:
-	~TNotCopyable()
+	TNotCopyable()
+		: Descriptor(nullptr)
+	{ }
+
+	TNotCopyable(const TNotCopyable&) = delete;
+	TNotCopyable& operator = (const TNotCopyable&) = delete;
+
+	void OpenToWrite(std::string const & fileName)
 	{
-		this->Close();
+		if (Descriptor != nullptr)
+			throw FileAlreadyOpened();
+		Descriptor = fopen(fileName.c_str(), "w");
 	}
-	TNotCopyable(std::string const & fileName, const char * mode)
+
+	void OpenToRead(std::string const & fileName)
 	{
-		static const char* modes[] = { "r", "w", "a", "r+", "w+", "a+", "rb", "wb", "ab", "r+b", "w+b", "a+b", "rb+", "wb+", "ab+", "wx", "wbx", "w+x", "wb+x", "w+bx" };
-		for (size_t i = 0; i < 20; ++i)
-		{
-			if (modes[i] == mode)
-			{
-				Descriptor = fopen(fileName.c_str(), mode);
-				if (Descriptor == nullptr)
-					throw(std::exception("Incorrect way"));
-			}
-		}
-		throw(std::exception("Incorrect mode"));
+		if (Descriptor != nullptr)
+			throw FileAlreadyOpened();
+		Descriptor = fopen(fileName.c_str(), "r");
 	}
+
 	void Close() throw()
 	{
 		if (Descriptor != nullptr)
@@ -44,14 +50,23 @@ public:
 			Descriptor = nullptr;
 		}
 	}
+
 	FILE * Get()
 	{
 		return Descriptor;
 	}
-private:
-	FILE * Descriptor;
-	TNotCopyable(const TNotCopyable & ) = delete;
-	TNotCopyable & operator = (const TNotCopyable & ) = delete;
+};
+
+class RAII
+{
+	TNotCopyable * Ptr;
+public:
+	~RAII()
+	{
+		Ptr->Close();
+	}
+	RAII(TNotCopyable * ptr) : Ptr(ptr)
+	{ }
 };
 
 #endif // __NOTCOPYABLE_INCLUDED__
