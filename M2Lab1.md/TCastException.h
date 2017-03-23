@@ -1,32 +1,40 @@
 #include <iostream>
 #include <stdexcept>
-#include <string>
 #include <algorithm>
 
 
-class TCastException : private std::exception{
-public:
-	virtual std::string what() = 0;
+struct TCastException 
+	: public std::exception
+{
+	TCastException() = default;
+	TCastException(const char* const message)
+		: std::exception(message)
+	{ }
 };
 
 
-class TOverFlow : public TCastException
+struct TOverFlow 
+	: public TCastException
 {
-	static std::string ErrorType;
-public:
-	std::string what()
-	{
-		return ErrorType;
-	}
+	TOverFlow() 
+		: TCastException("OverFlow")
+	{ }
 };
 
 
-class TInvalidSymbol : public TCastException
+struct TInvalidSymbol 
+	: public TCastException
 {
-	static std::string ErrorType;
-public:
-	std::string what()
-	{
-		return ErrorType;
-	}
+	TInvalidSymbol()
+		: TCastException("InvalidSymbol")
+	{ }
+};
+
+
+struct TInvalidNumber 
+	: public TCastException
+{
+	TInvalidNumber()
+		: TCastException("InvalidNumber")
+	{ }
 };
