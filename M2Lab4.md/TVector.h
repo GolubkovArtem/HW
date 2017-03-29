@@ -13,13 +13,12 @@ public:
 	using reference = value_type & ;
 	using const_reference = const value_type & ;
 private:
-	value_type * Ptr;
+	iterator Ptr;
 	size_type Count;
 	size_type InternalCapacity;
 public:
-	~TVector()
-	{
-		delete[] Ptr;
+	~TVector() {
+		if (Ptr != nullptr) delete[] Ptr;
 	}
 
 
@@ -36,44 +35,36 @@ public:
 		Ptr = new value_type[InternalCapacity];
 	}
 
-	TVector(const TVector & vector)
-	{
+	TVector(const TVector & vector) {
 		Count = vector.Count;
 		InternalCapacity = vector.InternalCapacity;
 		Ptr = new value_type[InternalCapacity];
-		for (size_type i = 0; i < Count; ++i) 
-			memcpy(Ptr, vector.Ptr, Count * sizeof(value_type));
+		memcpy(Ptr, vector.Ptr, Count * sizeof(value_type));
 	}
 
 
-	bool Empty() const throw()
-	{
-		return Size() == 0;
+	bool Empty() const throw() {
+		return this->Size() == 0;
 	}
 
-	size_type Size() const throw()
-	{
+	size_type Size() const throw() {
 		return Count;
 	}
 
-	size_type Capacity() const throw()
-	{
+	size_type Capacity() const throw() {
 		return InternalCapacity;
 	}
 
-	iterator Begin() const throw()
-	{
+	iterator Begin() const throw() {
 		return Ptr;
 	}
 
-	iterator End() const throw()
-	{
+	iterator End() const throw() {
 		return Ptr + Count;
 	}
 
 
-	void Reserve(size_type size)
-	{
+	void Reserve(size_type size) {
 		InternalCapacity = size;
 		iterator buf = Ptr;
 		Ptr = new value_type[size];
@@ -82,8 +73,7 @@ public:
 		if (buf != nullptr) delete[] buf;
 	}
 
-	TVector & operator = (const TVector & vector)
-	{
+	TVector & operator = (const TVector & vector) {
 		Count = vector.Count;
 		InternalCapacity = vector.InternalCapacity;
 		if (Ptr != nullptr) delete[] Ptr;
@@ -92,133 +82,126 @@ public:
 		return *this;
 	}
 
-	void PushBack (const value_type& value)
-	{
+	void PushBack (const_reference value) {
 		if (Count == InternalCapacity)
 			Reserve(InternalCapacity + 1);
-		Ptr[Count] = value;
+		Ptr[this->Size()] = value;
 		Count++;
 	}
 
-	reference At (size_type index)
-	{
+	reference At (size_type index) {
 		if (index < Count)
 			return Ptr[index];
 		throw(std::exception("Error"));
 	}
 
-	value_type At (size_type index) const
-	{
+	value_type At (size_type index) const {
 		if (index < Count)
 			return Ptr[index];
 		throw(std::exception("Error"));
 	}
 
-	reference operator [] (size_type index)
-	{
+	reference operator [] (size_type index) {
 		if (index < Count)
 			return Ptr[index];
 	}
 
-	const_reference operator [] (size_type index) const
-	{
+	const_reference operator [] (size_type index) const {
 		if (index < Count)
 			return Ptr[index];
 	}
 
-	reference Front()
-	{
+	reference Front() {
 		if (Count)
-			return *this->Begin();
+			return Ptr[0];
 	}
 
-	const_reference Front() const
-	{
+	const_reference Front() const {
 		if (Count)
-			return *this->Begin();
+			return Ptr[0];
 	}
 
-	reference Back()
-	{
+	reference Back() {
 		if (Count)
 			return *(this->End() - 1);
 	}
 
-	const_reference Back() const
-	{
+	const_reference Back() const {
 		if (Count)
 			return *(this->End() - 1);
 	}
 
-	void Clear()
-	{
+	void Clear() {
+		InternalCapacity = 0;
 		Count = 0;
+		if (Ptr != nullptr) delete[] Ptr;
+ 	}
+
+	void PopBack() {
+		if (Count) --Count;
 	}
 
-	void PopBack()
-	{
-		if (Count)
-			--Count;
-	}
-
-	void Swap(TVector & other) throw()
-	{
+	void Swap(TVector & other) throw() {
 		TVector buf = *this;
 		for (size_type i = 0; i < InternalCapacity && i < other.InternalCapacity; ++i)
 			std::swap(Ptr[i], other.Ptr[i]);
 		InternalCapacity >= other.Count ? Count = other.Count : Count = InternalCapacity;
-		other. InternalCapacity >= Count ? other.Count = Count : other.Count = other.InternalCapacity;
+		other.InternalCapacity >= Count ? other.Count = Count : other.Count = other.InternalCapacity;
 	}
 
-	void Resize(size_type count, value_type value = value_type())
-	{
+	void Resize(size_type count, value_type value = value_type()) {
 		if (count >= std::numeric_limits<size_type>::max())
-			throw(std::exception("Error"));
+			throw(std::exception("limits_error"));
 		size_type buf(Count);
-		count <= InternalCapacity ? Count = count : Count = InternalCapacity;
-		if (buf <= Count)
-			Insert((this->Begin() + buf), Count - buf, 0);
+		count <= InternalCapacity ?	Count = count 
+			: Count = InternalCapacity;
+		Insert(this->Begin() + buf, Count - buf, value);
 	}
 
-	iterator Insert(iterator pos, const value_type & value)
-	{
-		if (pos < this->End())
+	iterator Insert(iterator pos, const_reference value) {
+		if (pos == this->End() && InternalCapacity > Count)
+			++Count;
+		if (pos < this->End() && pos >= this->Begin())
 		{
 			*pos = value;
-			if (pos == this->End()) ++Count;
 			return pos;
 		}
+		return this->Begin();
 	}
 
-	void Insert(iterator pos, size_type count, const value_type & value)
-	{
+	void Insert(iterator pos, size_type count, const_reference value) {
 		if (count >= std::numeric_limits<size_type>::max())
-			throw(std::exception("Error"));
-		if (pos < this->End())
+			throw(std::exception("limits_error"));
+		if (pos < this->End() && pos >= this->Begin())
 		{
 			iterator i(pos);
-			for (; i < (pos + count - 1) && i < (this->Begin() + InternalCapacity); ++i) *i = value;
+			for (; i < (pos + count - 1) && i != (this->Begin() + InternalCapacity); ++i) *i = value;
 			Count = (i - this->Begin());
 		}
 	}
 
-	iterator Erase(iterator pos)
-	{
+	iterator Erase(iterator pos) {
 		if (pos >= this->End() || pos < this->Begin())
-			return this->Begin();
-		for (iterator i = pos; i + 1 < this->End(); ++i)
+			return this->End();
+		for (iterator i = pos; i + 1 != this->End(); ++i)
 			*i = *(i + 1);
 		--Count;
-		return this->Begin();
+		if (pos == this->End())
+			return pos;
+		else
+			return pos + 1;
 	}
 
-	iterator Erase(iterator first, iterator last)
-	{
+	iterator Erase(iterator first, iterator last) {
 		if (first >= this->End() || first < this->Begin())
-			return this->Begin();
-		for (iterator i = first; (i + (last - first + 1)) < this->End(); ++i)
+			return this->End();
+		for (iterator i = first; (i + (last - first + 1)) != this->End(); ++i)
 			*i = *(i + (last - first + 1));
 		(last - this->Begin()) < Count ? Count -= (last - first + 1) : Count = (first - this->Begin());
+		if (last >= this->End())
+			return this->End();
+		else
+			return last + 1;
 	}
 };
 
