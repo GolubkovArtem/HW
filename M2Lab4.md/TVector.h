@@ -9,9 +9,9 @@ class TVector
 public:
 	using value_type = int;
 	using size_type = size_t;
-	using iterator = value_type * ;
-	using reference = value_type & ;
-	using const_reference = const value_type & ;
+	using iterator = value_type *;
+	using reference = value_type &;
+	using const_reference = const value_type &;
 private:
 	iterator Ptr;
 	size_type Count;
@@ -39,7 +39,8 @@ public:
 		Count = vector.Count;
 		InternalCapacity = vector.InternalCapacity;
 		Ptr = new value_type[InternalCapacity];
-		memcpy(Ptr, vector.Ptr, Count * sizeof(value_type));
+		for (size_type i = 0; i < Count; ++i)
+			Ptr[i] = vector.Ptr[i];
 	}
 
 
@@ -69,7 +70,8 @@ public:
 		iterator buf = Ptr;
 		Ptr = new value_type[size];
 		if (size < Count) Count = size;
-		memcpy(Ptr, buf, Count * sizeof(value_type));
+		for (size_type i = 0; i < Count; ++i)
+			Ptr[i] = buf[i];
 		if (buf != nullptr) delete[] buf;
 	}
 
@@ -78,24 +80,25 @@ public:
 		InternalCapacity = vector.InternalCapacity;
 		if (Ptr != nullptr) delete[] Ptr;
 		Ptr = new value_type[InternalCapacity];
-		memcpy(Ptr, vector.Ptr, Count * sizeof(value_type));
+		for (size_type i = 0; i < Count; ++i)
+			Ptr[i] = vector.Ptr[i];
 		return *this;
 	}
 
-	void PushBack (const_reference value) {
+	void PushBack(const_reference value) {
 		if (Count == InternalCapacity)
-			Reserve(InternalCapacity + 1);
+			this->Reserve(InternalCapacity + 1);
 		Ptr[this->Size()] = value;
-		Count++;
+		++Count;
 	}
 
-	reference At (size_type index) {
+	reference At(size_type index) {
 		if (index < Count)
 			return Ptr[index];
 		throw(std::exception("Error"));
 	}
 
-	value_type At (size_type index) const {
+	value_type At(size_type index) const {
 		if (index < Count)
 			return Ptr[index];
 		throw(std::exception("Error"));
@@ -132,9 +135,10 @@ public:
 	}
 
 	void Clear() {
+		InternalCapacity = 0;
 		Count = 0;
 		if (Ptr != nullptr) delete[] Ptr;
- 	}
+	}
 
 	void PopBack() {
 		if (Count) --Count;
@@ -160,7 +164,7 @@ public:
 		{
 			Reserve(count);
 		}
-		Insert(this->Begin() + Count, count - Count, value);	
+		Insert(this->Begin() + Count, count - Count, value);
 	}
 
 	iterator Insert(iterator pos, const_reference value) {
