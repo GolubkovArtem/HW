@@ -132,7 +132,6 @@ public:
 	}
 
 	void Clear() {
-		InternalCapacity = 0;
 		Count = 0;
 		if (Ptr != nullptr) delete[] Ptr;
  	}
@@ -152,37 +151,46 @@ public:
 	void Resize(size_type count, value_type value = value_type()) {
 		if (count >= std::numeric_limits<size_type>::max())
 			throw(std::exception("limits_error"));
-		size_type buf(Count);
-		count <= InternalCapacity ?	Count = count 
-			: Count = InternalCapacity;
-		Insert(this->Begin() + buf, Count - buf, value);
+		if (count <= Count)
+		{
+			Count = count;
+			return;
+		}
+		if (count > InternalCapacity)
+		{
+			Reserve(count);
+		}
+		Insert(this->Begin() + Count, count - Count, value);	
 	}
 
 	iterator Insert(iterator pos, const_reference value) {
-		if (pos == this->End() && InternalCapacity > Count)
+		if (pos == this->End() && InternalCapacity != Count)
 			++Count;
-		if (pos < this->End() && pos >= this->Begin())
+		if ((pos - this->Begin()) < InternalCapacity && (pos - this->Begin()) >= 0)
 		{
 			*pos = value;
 			return pos;
 		}
-		return this->Begin();
+		throw("range_error");
 	}
 
 	void Insert(iterator pos, size_type count, const_reference value) {
 		if (count >= std::numeric_limits<size_type>::max())
 			throw(std::exception("limits_error"));
-		if (pos < this->End() && pos >= this->Begin())
+		iterator t = this->End();
+		if (pos <= this->End() && pos >= this->Begin())
 		{
 			iterator i(pos);
 			for (; i < (pos + count - 1) && i != (this->Begin() + InternalCapacity); ++i) *i = value;
 			Count = (i - this->Begin());
+			return;
 		}
+		throw("range_error");
 	}
 
 	iterator Erase(iterator pos) {
 		if (pos >= this->End() || pos < this->Begin())
-			return this->End();
+			throw("range_error");
 		for (iterator i = pos; i + 1 != this->End(); ++i)
 			*i = *(i + 1);
 		--Count;
@@ -193,8 +201,8 @@ public:
 	}
 
 	iterator Erase(iterator first, iterator last) {
-		if (first >= this->End() || first < this->Begin())
-			return this->End();
+		if (first >= this->End() || first < this->Begin() || last < first)
+			throw("range_error");
 		for (iterator i = first; (i + (last - first + 1)) != this->End(); ++i)
 			*i = *(i + (last - first + 1));
 		(last - this->Begin()) < Count ? Count -= (last - first + 1) : Count = (first - this->Begin());
