@@ -178,8 +178,7 @@ public:
 	{ }
 
 	TSet(const_reference value) {
-		iterator * newRoot = new iterator;
-		Root = newRoot;
+		Root = new iterator;
 		Root->Value = value;
 		Begin = *Root;
 		End = *Root;
@@ -208,8 +207,7 @@ public:
 	void insert(const_reference value) {
 
 		if (empty()) {
-			iterator * newRoot = new iterator;
-			Root = newRoot;
+			Root = new iterator;
 			Root->Value = value;
 			Begin = *Root;
 			End = *Root;
