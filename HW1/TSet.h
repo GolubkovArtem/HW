@@ -56,12 +56,16 @@ public:
 	}
 
 
-	bool operator == (const bidirectional_iterator<T> & bIter) const {
-		return **this == *bIter;
+	bool operator == (const bidirectional_iterator<T> & bIter) const{
+		if (this == nullptr)
+			return 0;
+		if (bIter.Up == Up && *bIter == Value)
+			return 1;
+		return 0;
 	}
 
 	bool operator != (const bidirectional_iterator<T> & bIter) const {
-		return **this != *bIter;
+		return !(*this == bIter);
 	}
 
 	value_type operator * () const {
@@ -180,8 +184,10 @@ public:
 	TSet(const_reference value) {
 		Root = new iterator;
 		Root->Value = value;
+		Root->Right = &End;
+		End.Up = Root;
+		End.Value = value;
 		Begin = *Root;
-		End = *Root;
 		Size = 1;
 	}
 
@@ -199,7 +205,6 @@ public:
 		for (auto it = *set.Root; it != set.Begin; --it)
 			insert(*it);
 		insert(*set.Begin);
-		insert(*set.End);
 		return *this;
 	}
 
@@ -209,8 +214,10 @@ public:
 		if (empty()) {
 			Root = new iterator;
 			Root->Value = value;
+			Root->Right = &End;
+			End.Up = Root;
+			End.Value = value;
 			Begin = *Root;
-			End = *Root;
 			Size = 1;
 			return;
 		}
@@ -220,7 +227,7 @@ public:
 
 		while(value != **i) {
 
-			if (compare(**i, value) && i->Right == nullptr) {
+			if (compare(**i, value) && (i->Right == nullptr || *i->Right == End)) {
 				iterator * newBranch = new iterator;
 				newBranch->Up = i;
 				newBranch->Value = value;
@@ -257,13 +264,13 @@ public:
 
 		if (value == **Root) {
 
-			if (buf.Left != nullptr && buf.Right == nullptr) {
+			if (buf.Left != nullptr && (buf.Right == nullptr && *buf.Right == End)) {
 				Root = buf.Left;
 				pBuf = Root->Up;
 				Root->Up = nullptr;
 				this->reIt();
 			}
-			else if (buf.Right != nullptr)
+			else if (buf.Right != nullptr && *buf.Right != End)
 			{
 				Root = buf.Right;
 				pBuf = Root->Up;
@@ -308,6 +315,10 @@ public:
 
 	}
 
+	void erase(const_iterator it) {
+		erase(*it);
+	}
+
 	void swap(TSet & set) {
 		TSet buf(set);
 		set = *this;
@@ -317,11 +328,12 @@ public:
 	void clear() {
 		if (empty())
 			return;
-		for (auto it = Begin; it != End;) {
+		for (auto it = Begin;;) {
 			this->erase(*it++);
+			if (it == End)
+				break;
 			it = find(*it);
 		}
-		this->erase(*End);
 	}
 
 	//////////////////////////////////////////////////// value_compare()
@@ -376,7 +388,7 @@ public:
 		while (1) {
 			if (*it == value)
 				return it;
-			else if (compare(*it, value) && it.Right != nullptr)
+			else if (compare(*it, value) && it.Right != nullptr && *it.Right != End)
 				it = *it.Right;
 			else if (compare(value, *it) && it.Left != nullptr)
 				it = *it.Left;
@@ -401,9 +413,13 @@ public:
 			it = it->Left;
 		Begin = *it;
 		it = Root;
-		while (it->Right != nullptr)
+		while (it->Right != nullptr && *it->Right != End)
 			it = it->Right;
-		End = *it;
+		if (*it->Right != End) {
+			it->Right = &End;
+			End.Up = it;
+			End.Value = **Root;
+		}
 	}
 
 	// добавляет ветку в дерево без учёта Size
@@ -415,7 +431,7 @@ public:
 		branch->Up = nullptr;
 
 		while (branch->Up == nullptr) {
-			if (compare(**it, **branch) && it->Right != nullptr)
+			if (compare(**it, **branch) && it->Right != nullptr && *it->Right != End)
 				it = it->Right;
 			else if (compare(**branch, **it) && it->Left != nullptr)
 				it = it->Left;
@@ -436,13 +452,11 @@ public:
 
 };
 
-
 template <typename T>
 std::ostream & operator << (std::ostream & out, TSet<T> & set) {
 	if (set.empty())
 		return out;
 	for (auto it = set.begin(); it != set.end(); ++it)
 		out << *it << " ";
-	out << *set.end();
 	return out;
 }
