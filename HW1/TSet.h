@@ -165,10 +165,10 @@ public:
 
 private:
 
+	size_type Size;
 	iterator * Root;
 	iterator Begin;
 	iterator End;
-	size_type Size;
 
 public:
 
@@ -196,6 +196,8 @@ public:
 	}
 
 	TSet & operator = (const TSet & set) {
+		if (set.Root == Root)
+			return *this;
 		if (!empty())
 			clear();
 		if (set.empty())
@@ -320,6 +322,8 @@ public:
 	}
 
 	void swap(TSet & set) {
+		if (set.Root == Root)
+			return;
 		TSet buf(set);
 		set = *this;
 		*this = buf;
@@ -356,8 +360,8 @@ public:
 	}
 
 	iterator end() const {
-		if (empty())
-			throw std::exception("appeal to empty tree");
+		//if (empty())
+			//throw std::exception("appeal to empty tree");
 		return End;
 	}
 
@@ -380,7 +384,8 @@ public:
 	iterator find(const_reference value) const {
 
 		if (empty())
-			throw std::exception("appeal to empty tree");
+			return End;
+			//throw std::exception("appeal to empty tree");
 
 		iterator it(*Root);
 		Compare compare;
