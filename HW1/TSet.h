@@ -206,7 +206,7 @@ public:
 		if (!empty())
 			clear();
 		if (set.empty())
-			return *this;		
+			return *this;
 		for (auto it = *set.Root; it != set.End; ++it)
 			insert(*it);
 		for (auto it = *set.Root; it != set.Begin; --it)
@@ -328,11 +328,17 @@ public:
 	}
 
 	void swap(TSet & set) {
+		std::swap(Comp, set.Comp);
 		if (set.Root == Root)
 			return;
-		TSet buf(set);
-		set = *this;
-		*this = buf;
+		std::swap(Root, set.Root);
+		std::swap(End, set.End);
+		if (End.Up != nullptr)
+			End.Up->Right = &End;
+		if (set.End.Up != nullptr)
+			set.End.Up->Right = &set.End;
+		std::swap(Begin, set.Begin);
+		std::swap(Size, set.Size);
 	}
 
 	void clear() {
@@ -417,6 +423,8 @@ public:
 	
 	// переопределяет Begin и End
 	void reIt() {
+		if (Root == nullptr)
+			return;
 		iterator * it = Root;
 		while (it->Left != nullptr)
 			it = it->Left;
