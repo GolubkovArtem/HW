@@ -165,10 +165,11 @@ public:
 
 private:
 
-	size_type Size;
 	iterator * Root;
 	iterator Begin;
 	iterator End;
+	size_type Size;
+	Compare Comp;
 
 public:
 
@@ -176,12 +177,15 @@ public:
 		clear();
 	}
 
-	TSet()
+	explicit TSet(const value_compare & comp = value_compare())
 		: Root(nullptr)
 		, Size(0)
+		, Comp(comp)
 	{ }
 
-	TSet(const_reference value) {
+	TSet(const_reference value, const value_compare & comp = value_compare()) 
+		: Comp(comp)
+	{
 		Root = new iterator;
 		Root->Value = value;
 		Root->Right = &End;
@@ -195,7 +199,7 @@ public:
 		*this = set;
 	}
 
-	TSet & operator = (const TSet & set) {
+	TSet & operator = (const TSet<T, Compare> & set) {
 		if (set.Root == Root)
 			return *this;
 		if (!empty())
@@ -224,12 +228,11 @@ public:
 			return;
 		}
 
-		Compare compare;
 		iterator * i = Root;
 
 		while(value != **i) {
 
-			if (compare(**i, value) && (i->Right == nullptr || *i->Right == End)) {
+			if (Comp(**i, value) && (i->Right == nullptr || *i->Right == End)) {
 				iterator * newBranch = new iterator;
 				newBranch->Up = i;
 				newBranch->Value = value;
@@ -237,7 +240,7 @@ public:
 				++Size;
 				i = newBranch;
 			}
-			else if (compare(value, **i) && i->Left == nullptr) {
+			else if (Comp(value, **i) && i->Left == nullptr) {
 				iterator * newBranch = new iterator;
 				newBranch->Up = i;
 				newBranch->Value = value;
@@ -245,7 +248,7 @@ public:
 				++Size;
 				i = newBranch;
 			}
-			else if (compare(**i, value))
+			else if (Comp(**i, value))
 				i = i->Right;
 			else
 				i = i->Left;
@@ -387,14 +390,13 @@ public:
 			throw std::exception("appeal to empty tree");
 
 		iterator it(*Root);
-		Compare compare;
 
 		while (1) {
 			if (*it == value)
 				return it;
-			else if (compare(*it, value) && it.Right != nullptr && *it.Right != End)
+			else if (Comp(*it, value) && it.Right != nullptr && *it.Right != End)
 				it = *it.Right;
-			else if (compare(value, *it) && it.Left != nullptr)
+			else if (Comp(value, *it) && it.Left != nullptr)
 				it = *it.Left;
 			else
 				return End;
@@ -430,16 +432,15 @@ public:
 	void insertBranch(iterator * branch) {
 
 		iterator * it(Root);
-		Compare compare;
 
 		branch->Up = nullptr;
 
 		while (branch->Up == nullptr) {
-			if (compare(**it, **branch) && it->Right != nullptr && *it->Right != End)
+			if (Comp(**it, **branch) && it->Right != nullptr && *it->Right != End)
 				it = it->Right;
-			else if (compare(**branch, **it) && it->Left != nullptr)
+			else if (Comp(**branch, **it) && it->Left != nullptr)
 				it = it->Left;
-			else if (compare(**it, **branch)) {
+			else if (Comp(**it, **branch)) {
 				it->Right = branch;
 				branch->Up = it;
 			}
@@ -456,8 +457,8 @@ public:
 
 };
 
-template <typename T>
-std::ostream & operator << (std::ostream & out, TSet<T> & set) {
+template <typename T, class Compare>
+std::ostream & operator << (std::ostream & out, TSet<T, Compare> & set) {
 	if (set.empty())
 		return out;
 	for (auto it = set.begin(); it != set.end(); ++it)
