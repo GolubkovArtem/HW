@@ -165,11 +165,11 @@ public:
 
 private:
 
+	Compare Comp;
 	iterator * Root;
 	iterator Begin;
 	iterator End;
 	size_type Size;
-	Compare Comp;
 
 public:
 
@@ -200,6 +200,7 @@ public:
 	}
 
 	TSet & operator = (const TSet<T, Compare> & set) {
+		Comp = set.Comp;
 		if (set.Root == Root)
 			return *this;
 		if (!empty())
@@ -259,7 +260,9 @@ public:
 
 	}
 
-	void erase(const_reference value) {
+	void erase(const_iterator it) {
+
+		value_type value = *it;
 
 		if (!count(value))
 			return;
@@ -320,8 +323,8 @@ public:
 
 	}
 
-	void erase(const_iterator it) {
-		erase(*it);
+	void erase(const_reference value) {
+		erase(find(value));
 	}
 
 	void swap(TSet & set) {
