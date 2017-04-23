@@ -360,8 +360,8 @@ public:
 	}
 
 	iterator end() const {
-		//if (empty())
-			//throw std::exception("appeal to empty tree");
+		if (empty())
+			throw std::exception("appeal to empty tree");
 		return End;
 	}
 
@@ -384,8 +384,7 @@ public:
 	iterator find(const_reference value) const {
 
 		if (empty())
-			return End;
-			//throw std::exception("appeal to empty tree");
+			throw std::exception("appeal to empty tree");
 
 		iterator it(*Root);
 		Compare compare;
