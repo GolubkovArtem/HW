@@ -299,139 +299,38 @@ public:
 
 	boolean_function operator()(const std::vector<boolean_function> & fs) const {
 
-		// первичная проверка на кол-во переданных функций
 		if (dimension() != fs.size())
 			throw std::exception("invalid dimension");
 
-		// обьявление переменных
-		size_type max_dimension(0);	// - максимальная размерность полученных функций
-
-		std::vector<std::vector<bool>> variables; // - списки всех существенных 
-												  // и фиктивных переменных полученных функций
-
-		size_type var_num(0); // - для нужд цикла ниже
-
-							  // заполнение переменной variables
-		for (auto & i : fs) {
-
-			// расчёт max_dimension
-			if (max_dimension < i.dimension()) {
+		size_type max_dimension(0);
+		
+		for (auto & i : fs)
+			if (max_dimension < i.dimension())
 				max_dimension = i.dimension();
-				variables.resize(fs.size());
-			}
 
-			for (size_type j = 0; j < i.dimension(); ++j) {
-
-				for (size_type k = 0; k + pow(2, j) < i.size(); ++k)
-					if (k % static_cast<size_type>(pow(2, j + 1)) < pow(2, j + 1) / 2)
-						if (i.Series[k] != i.Series[k + pow(2, j)]) {
-							variables[var_num].push_back(1);
-							break;
-						}
-
-				if (variables[var_num].size() == j)
-					variables[var_num].push_back(0);
-
-			}
-			++var_num;
-
-		}
-
-		// переменные от которых будет зависеть результат
-		std::vector<size_type> true_variables;
-
-		// блок, в котором true_variables заполняется номерами всех 
-		// существенных переменных полученных функций
-		{
-
-			std::vector<bool> bool_true_variables;
-			bool_true_variables.resize(max_dimension);
-
-			for (size_type i = 0; i < max_dimension; ++i)
-				for (size_type j = 0; j < dimension(); ++j)
-					if (i < variables[j].size() && variables[j][i] == 1)
-						bool_true_variables[i] = 1;
-
-			for (size_type i = 0; i < max_dimension; ++i)
-				if (bool_true_variables[i])
-					true_variables.push_back(i + 1);
-
-		}
-
-		// связка else if, которая приводит true_variables к нужному размеру,
-		// приоритет отдаётся младшим переменным 
-		if (true_variables.size() > dimension())
-			while (dimension() != true_variables.size())
-				true_variables.erase(true_variables.end() - 1);
-
-		else if (true_variables.size() < dimension()) {
-
-			size_type i(1);
-
-			while (dimension() != true_variables.size()) {
-
-				if (true_variables.size() < i)
-					true_variables.push_back(i);
-				else if (true_variables[i - 1] != i)
-					true_variables.insert(true_variables.begin() + i - 1, i);
-
-				i++;
-			}
-		}
-
-		// проверка, что каждая существенная переменная полученных функций
-		// присутствует в true_variables
-		for (auto & i : variables) {
-			for (size_type j = 0; j < i.size(); ++j)
-				if (i[j]) {
-					size_type w(0);
-					for (auto & k : true_variables)
-						if (k == j + 1) {
-							w = 1; //!!!!
-							break;
-						}
-					if (w == 0)
-						throw std::exception("invalid composition");
-				}
-		}
-
-		// копирование полученных функций для последующего их изменения
 		std::vector<boolean_function> functions;
 		for (auto & i : fs)
 			functions.push_back(i);
 
-		// приведение полученных функций в functions к нужному размеру
-		for (size_type i = 0; i < functions.size(); ++i) {
+		boolean_function main_func(*this);
+		while (main_func.dimension() < max_dimension)
+			main_func.insert_irrelevant_variable(main_func.dimension() + 1);
 
-			size_type erased(0);
 
-			// удаляем все фиктивные переменные, которые не входят в true_variables
-			for (size_type j = 0; j < functions[i].dimension(); ) {
-				if (!variables[i][j] && !find(true_variables, j + erased + 1)) {
-					functions[i].erase_irrelevant_variable(j + 1);
-					(variables[i]).erase(variables[i].begin() + j);
-					++erased;
-				}
-				else
-					++j;
-			}
-
-			//добавляем, если необходимо, старшие фиктивные переменные
-			while (functions[i].dimension() < true_variables.size())
+		for (size_type i = 0; i < functions.size(); ++i)
+			while (functions[i].dimension() < max_dimension)
 				functions[i].insert_irrelevant_variable(functions[i].dimension() + 1);
 
-		}
 
-		// расчитываем и отправляем результат
 		std::vector<bool> buf_result;
 
-		for (size_type i = 0; i < size(); ++i) {
+		for (size_type i = 0; i < pow(2, max_dimension); ++i) {
 			size_type buf(0);
 			for (size_type j = 0; j < dimension(); ++j) {
 				if (functions[j][i])
 					buf += pow(2, dimension() - j - 1);
 			}
-			buf_result.push_back(Series[buf]);
+			buf_result.push_back(main_func.Series[buf]);
 		}
 
 		boolean_function result(buf_result);
