@@ -6,6 +6,10 @@
 
 
 InfInt RisingFactorial(const size_t & start, const size_t & end) {
+
+	if (start == end)
+		return 1;
+
 	InfInt result(start + 1);
 	for (size_t i = start + 2; i <= end; ++i)
 		result *= i;
@@ -37,12 +41,6 @@ InfInt Sample(const size_t & n, const size_t k) {
 	if (n < k)
 		return 0;
 
-	if (n == 0)
-		return 1;
-
-	if (k == 0)
-		return n;
-
 	InfInt a(1);
 	InfInt b(1);
 	
@@ -57,9 +55,6 @@ InfInt Sample(const size_t & n, const size_t k) {
 	thr1.join();
 	thr2.join();
 
-	std::cout << a << std::endl;
-	std::cout << b << std::endl;
-
 	InfInt result = b / a;
 
 	return result;
@@ -69,7 +64,7 @@ InfInt Sample(const size_t & n, const size_t k) {
 
 int main() {
 
-	std::cout << Sample(2000, 1000) << std::endl;
+	std::cout << Sample(3, 1) << std::endl;
 
 	system("pause");
 
