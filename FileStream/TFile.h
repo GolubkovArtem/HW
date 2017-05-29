@@ -60,7 +60,7 @@ public:
 		fseek(Descriptor, pos, SEEK_CUR);
 	}
 
-	void read(char * buf, const size_t number) {
+	void read(char * buf, const size_t number) const {
 		if (Descriptor == nullptr)
 			throw std::exception("File was not opened");
 
@@ -95,11 +95,14 @@ public:
 		return modes.find(mode) != modes.end();
 	}
 
-	friend std::ostream & operator << (std::ostream & out, const FileStream & file);
+	void operator << (char * buf) const {
+		fputs(buf, Descriptor);
+	}
+
+	void operator >> (char * & buf) const {
+		buf = getline();
+	}
 
 };
 
-std::ostream & operator << (std::ostream & out, const FileStream & file) {
-	out << file.Descriptor;
-	return out;
-}
+
