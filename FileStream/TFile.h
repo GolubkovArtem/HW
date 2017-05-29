@@ -1,61 +1,105 @@
-#ifndef __NOTCOPYABLE_INCLUDED__
-#define __NOTCOPYABLE_INCLUDED__
-
 #pragma warning(disable:4996)
+#include <set>
 #include <exception>
-#include <cstdio>
 #include <string>
+#include <vector>
+#include <iostream>
 
-struct FileAlreadyOpened
-	: public std::exception
+
+
+
+class FileStream
 {
-	FileAlreadyOpened() = default;
-	FileAlreadyOpened(const char* const message)
-		: std::exception(message)
-	{ }
-};
-
-
-class TFile
-{
-
 	FILE * Descriptor;
 
 public:
 
-	~TFile() {
-		Close();
+	~FileStream() {
+		close();
 	}
 
-	TFile()
+	FileStream()
 		: Descriptor(nullptr)
 	{ }
 
-	TFile(const TFile&) = delete;
-	TFile& operator = (const TFile&) = delete;
+	FileStream(const FileStream & ) = delete;
 
-	void OpenToWrite(std::string const & fileName) {
+	FileStream & operator = (const FileStream & ) = delete;
+
+	void open(std::string const & fileName, char * mode) {
 		if (Descriptor != nullptr)
-			throw FileAlreadyOpened("file already opened");
-		Descriptor = fopen(fileName.c_str(), "w");
+			throw std::exception("File already opened");
+		if (!check_mode(mode))
+			throw std::exception("Incorect mode");
+		Descriptor = fopen(fileName.c_str(), mode);
 	}
 
-	void OpenToRead(std::string const & fileName) {
-		if (Descriptor != nullptr)
-			throw FileAlreadyOpened("file already opened");
-		Descriptor = fopen(fileName.c_str(), "r");
+	bool is_open() const {
+		return Descriptor;
 	}
 
-	void Close() throw() {
-		if (Descriptor != nullptr) {
+	char * getline() const {
+
+		if (Descriptor == nullptr)
+			throw std::exception("File was not opened");
+
+		std::vector<char> buf;
+
+		while (!feof(Descriptor))
+			buf.push_back(fgetc(Descriptor));
+
+		char * result = new char[buf.size() + 1];
+		std::copy(buf.begin(), buf.end(), result);
+		result[buf.size()] = '\0';
+
+		return result;
+
+	}
+
+	void seek(std::streampos pos) const {
+		fseek(Descriptor, pos, SEEK_CUR);
+	}
+
+	void read(char * buf, const size_t number) {
+		if (Descriptor == nullptr)
+			throw std::exception("File was not opened");
+
+		fgets(buf, number + 1, Descriptor);
+		
+	}
+
+	void write(char * buf) const {
+		if (Descriptor == nullptr)
+			throw std::exception("File was not opened");
+
+		fputs(buf, Descriptor);
+
+	}
+
+	bool eof() const {
+		return feof(Descriptor);
+	}
+
+	void close() throw()
+	{
+		if (Descriptor != nullptr)
+		{
 			fclose(Descriptor);
 			Descriptor = nullptr;
 		}
 	}
 
-	FILE * Get() {
-		return Descriptor;
+	bool check_mode(const std::string & mode) const {
+		std::set<std::string> modes = { "r", "w", "a", "r+", "w+", "a+", "rb", "wb", "ab",
+			"r+b", "w+b", "a+b", "rb+", "wb+", "ab+", "wx", "wbx", "w+x", "wb+x", "w+bx" };
+		return modes.find(mode) != modes.end();
 	}
+
+	friend std::ostream & operator << (std::ostream & out, const FileStream & file);
+
 };
 
-#endif // __NOTCOPYABLE_INCLUDED__
+std::ostream & operator << (std::ostream & out, const FileStream & file) {
+	out << file.Descriptor;
+	return out;
+}
